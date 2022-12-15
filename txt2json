@@ -1,0 +1,52 @@
+import json
+import base64
+from PIL import Image
+# date
+bbox = [[206.90909090909088, 210.5454545454545], [490.18181818181813, 520.3766233766233],
+        [428.7272727272727, 85.09090909090907], [721.3506493506493, 395.7012987012987]]
+point = [[397.8181818181818, 390.5454545454545], [374.18181818181813, 305.090909090909],
+         [423.27272727272725, 326.9090909090909], [359.6363636363636, 481.4545454545454],
+         [277.8181818181818, 510.5454545454545], [308.7272727272727, 408.72727272727263],
+         [281.45454545454544, 325.090909090909], [208.72727272727272, 255.99999999999994],
+         [297.8181818181818, 245.09090909090907],
+         [541.4545454545454, 290.5454545454545], [639.6363636363636, 254.18181818181813],
+         [605.090909090909, 312.3636363636364], [466.9090909090909, 259.63636363636357],
+         [437.81818181818176, 161.45454545454544], [517.8181818181818, 203.27272727272725],
+         [594.1818181818181, 179.63636363636363], [641.4545454545454, 90.5454545454545],
+         [666.9090909090909, 179.63636363636363], ]
+img_path = './1.jpg'
+img = Image.open(img_path)
+cur_json_dict = {
+    "version": "4.5.6",
+    "flags": {},
+    "shapes": [
+    ],
+}
+# bbox
+for i in range(int(len(bbox) / 2)):
+    if len(bbox) / 2 >= 1:
+        cur_json_dict['shapes'].append(
+            {"label": "bbox", "points": bbox[i * 2:i * 2+ 2], 'group_id': f'{i}', "shape_type": "rectangle", "flags": {}})
+    else:
+        cur_json_dict['shapes'].append(
+            {"label": "bbox", "points": bbox[i * 2:i * 2+ 2], 'group_id': 'NULL', "shape_type": "rectangle", "flags": {}})
+# point
+for i in range(int(len(point) / 9)):
+    for j in range(9):
+        if len(bbox) / 2 >= 1:
+            cur_json_dict['shapes'].append(
+                {"label": f"{j}", "points": point[i * 9 + j:i * 9 + j + 1], 'group_id': f'{i}',
+                 "shape_type": "point", "flags": {}})
+        else:
+            cur_json_dict['shapes'].append(
+                {"label": f"{j}", "points": point[i * 9 + j:i * 9 + j + 1], 'group_id': 'NULL',
+                 "shape_type": "point", "flags": {}})
+cur_json_dict["imagePath"] = img_path
+cur_json_dict["imageData"] = str(base64.b64encode(open(img_path, "rb").read()))
+# delete 'b and '
+cur_json_dict["imageData"] = cur_json_dict["imageData"][2:-1]
+cur_json_dict["imageHeight"] = img.size[0]
+cur_json_dict["imageWidth"] = img.size[1]
+new_dict = cur_json_dict
+with open(img_path.split(img_path.split('.')[-1])[0]+'json', 'a+') as f:
+    f.write(json.dumps(cur_json_dict))
